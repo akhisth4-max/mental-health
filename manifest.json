@@ -1,0 +1,19 @@
+{
+  "name": "Thought Record",
+  "short_name": "Thoughts",
+  "description": "A quiet space to untangle a thought — a 7-column CBT thought record.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1b2a4a",
+  "theme_color": "#1b2a4a",
+  "lang": "en",
+  "categories": ["health", "lifestyle", "productivity"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-192-mask.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon-512-mask.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

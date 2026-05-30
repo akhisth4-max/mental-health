@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1b2a4a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Thought Record</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4efe6;
+    --bg2:#ece4d6;
+    --ink:#2a2620;
+    --muted:#7a7064;
+    --line:#d9cfbe;
+    --navy:#1b2a4a;
+    --navy2:#33476f;
+    --gold:#b5894a;
+    --gold-soft:#e8d9bc;
+    --card:#fbf8f1;
+    --shadow:0 8px 30px rgba(40,30,15,.08);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Newsreader',Georgia,serif;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, #fbf6ec 0%, transparent 60%),
+      var(--bg);
+    color:var(--ink);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:90px;
+  }
+  .wrap{max-width:680px;margin:0 auto;padding:0 18px;}
+
+  header{
+    padding:26px 18px 18px;
+    text-align:center;
+    position:relative;
+  }
+  header h1{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:30px;
+    letter-spacing:.3px;
+    margin:0;
+    color:var(--navy);
+  }
+  header .sub{
+    font-style:italic;
+    color:var(--muted);
+    font-size:15px;
+    margin-top:4px;
+  }
+  .rule{height:1px;background:linear-gradient(90deg,transparent,var(--gold) 50%,transparent);margin:14px auto 0;max-width:160px;opacity:.6;}
+
+  /* Tabs */
+  .tabs{display:flex;gap:8px;margin:18px auto 4px;max-width:680px;padding:0 18px;}
+  .tab{
+    flex:1;text-align:center;padding:11px 8px;border-radius:12px;
+    font-family:'Fraunces',serif;font-size:16px;font-weight:500;
+    background:transparent;color:var(--muted);border:1px solid transparent;
+    cursor:pointer;transition:.2s;
+  }
+  .tab.active{background:var(--navy);color:#fff;box-shadow:var(--shadow);}
+
+  /* Form card */
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:18px 16px;
+    margin:14px 0;
+    box-shadow:var(--shadow);
+  }
+  .field{margin-bottom:20px;}
+  .field:last-child{margin-bottom:6px;}
+  .label{
+    display:block;
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:16px;
+    color:var(--navy);
+    margin-bottom:2px;
+  }
+  .hint{display:block;color:var(--muted);font-size:13.5px;font-style:italic;margin-bottom:8px;line-height:1.35;}
+  textarea,input[type=text]{
+    width:100%;border:1px solid var(--line);border-radius:12px;
+    background:#fffdf8;padding:12px 13px;font-family:'Newsreader',serif;
+    font-size:16px;color:var(--ink);resize:vertical;line-height:1.5;
+  }
+  textarea{min-height:74px;}
+  textarea:focus,input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft);}
+
+  .stop{
+    background:linear-gradient(180deg,#fff8ec,#fbf1dd);
+    border:1px solid var(--gold-soft);
+    border-left:3px solid var(--gold);
+    border-radius:12px;padding:11px 13px;margin-bottom:8px;
+    font-size:14px;color:#6f5a34;font-style:italic;
+  }
+  .stop b{font-style:normal;color:var(--gold);}
+
+  /* Slider */
+  .slider-row{display:flex;align-items:center;gap:14px;margin-top:4px;}
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;flex:1;height:6px;border-radius:6px;
+    background:linear-gradient(90deg,var(--gold) var(--p,0%),var(--line) var(--p,0%));
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:24px;height:24px;border-radius:50%;
+    background:var(--navy);border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.2);cursor:pointer;
+  }
+  input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--navy);border:3px solid #fff;cursor:pointer;}
+  .pct{font-family:'Fraunces',serif;font-weight:600;font-size:20px;color:var(--navy);min-width:54px;text-align:right;}
+
+  .date-input{font-family:'Newsreader',serif;}
+
+  /* Buttons */
+  .btn{
+    display:block;width:100%;border:none;border-radius:14px;
+    padding:15px;font-family:'Fraunces',serif;font-size:17px;font-weight:600;
+    background:var(--navy);color:#fff;cursor:pointer;letter-spacing:.3px;
+    box-shadow:var(--shadow);transition:.15s;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn.gold{background:linear-gradient(180deg,#c79752,#b5894a);}
+  .btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line);box-shadow:none;font-size:15px;padding:12px;}
+
+  /* Entries list */
+  .entry{
+    background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:15px 16px;margin:12px 0;box-shadow:var(--shadow);
+  }
+  .entry .top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:8px;}
+  .entry .date{font-family:'Fraunces',serif;font-weight:600;color:var(--navy);font-size:15px;}
+  .entry .trig{font-size:17px;margin:2px 0 10px;}
+  .moods{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+  .pill{font-size:13px;background:var(--bg2);border:1px solid var(--line);border-radius:20px;padding:3px 11px;color:#5a5347;}
+  .pill.before{background:#fbece2;border-color:#eccdb8;color:#9a5a32;}
+  .pill.after{background:#e8efe2;border-color:#c3d6b6;color:#4f6b3a;}
+  .entry-actions{display:flex;gap:8px;margin-top:6px;}
+  .mini{flex:1;padding:9px;border-radius:10px;border:1px solid var(--line);background:transparent;font-family:'Fraunces',serif;font-size:14px;color:var(--muted);cursor:pointer;}
+  .mini.del{color:#a4503e;border-color:#e3c4bb;}
+  .detail{font-size:15px;color:#4a443a;border-top:1px dashed var(--line);margin-top:8px;padding-top:8px;display:none;}
+  .detail.show{display:block;}
+  .detail p{margin:6px 0;}
+  .detail .dl{font-family:'Fraunces',serif;font-weight:600;color:var(--navy);font-size:13.5px;display:block;}
+
+  .empty{text-align:center;color:var(--muted);font-style:italic;padding:50px 20px;}
+  .empty svg{opacity:.4;margin-bottom:10px;}
+
+  .toast{
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);
+    background:var(--navy);color:#fff;padding:12px 22px;border-radius:30px;
+    font-family:'Fraunces',serif;font-size:15px;box-shadow:0 8px 24px rgba(0,0,0,.25);
+    transition:transform .3s cubic-bezier(.2,.9,.3,1.2);z-index:50;
+  }
+  .toast.show{transform:translateX(-50%) translateY(0);}
+
+  footer{text-align:center;color:var(--muted);font-size:12px;font-style:italic;padding:24px 18px 8px;line-height:1.5;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Thought Record</h1>
+  <div class="sub">a quiet space to untangle a thought</div>
+  <div class="rule"></div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" id="tabNew" onclick="showTab('new')">New entry</button>
+  <button class="tab" id="tabSaved" onclick="showTab('saved')">Saved <span id="count"></span></button>
+</div>
+
+<!-- NEW ENTRY -->
+<div class="wrap" id="viewNew">
+  <div class="card">
+    <div class="field">
+      <label class="label">Date</label>
+      <input type="date" id="f_date" class="date-input" style="width:auto;">
+    </div>
+
+    <div class="field">
+      <label class="label">1 · Situation / Trigger</label>
+      <span class="hint">What happened? Where, when, who with?</span>
+      <textarea id="f_situation" placeholder="Describe what set this off..."></textarea>
+    </div>
+
+    <div class="field">
+      <label class="label">2 · Feelings</label>
+      <span class="hint">Name the emotions and body sensations.</span>
+      <textarea id="f_feelings" placeholder="e.g. anxious, tight chest, restless..."></textarea>
+      <label class="label" style="font-size:14px;margin-top:12px;">Emotion intensity — before</label>
+      <div class="slider-row">
+        <input type="range" id="f_before" min="0" max="100" value="50" oninput="upd(this,'b')">
+        <span class="pct" id="beforeVal">50%</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="label">3 · Unhelpful Thought / Image</label>
+      <span class="hint">What went through your mind? What did it mean about you?</span>
+      <textarea id="f_thought" placeholder="The automatic thought..."></textarea>
+    </div>
+
+    <div class="field">
+      <label class="label">4 · Facts that support it</label>
+      <span class="hint">What facts make this feel true?</span>
+      <textarea id="f_for" placeholder="Evidence for..."></textarea>
+    </div>
+
+    <div class="field">
+      <label class="label">5 · Facts against it</label>
+      <span class="hint">What shows it isn't totally true? Opinion vs. fact?</span>
+      <textarea id="f_against" placeholder="Evidence against..."></textarea>
+    </div>
+
+    <div class="field">
+      <label class="label">6 · Balanced perspective</label>
+      <div class="stop"><b>STOP.</b> Take a breath. What would you say to a friend? What's the bigger picture?</div>
+      <textarea id="f_balanced" placeholder="A fairer, wiser way to see it..."></textarea>
+    </div>
+
+    <div class="field">
+      <label class="label">7 · Outcome</label>
+      <span class="hint">Re-rate the emotion. What can you do now?</span>
+      <label class="label" style="font-size:14px;">Emotion intensity — after</label>
+      <div class="slider-row">
+        <input type="range" id="f_after" min="0" max="100" value="50" oninput="upd(this,'a')">
+        <span class="pct" id="afterVal">50%</span>
+      </div>
+      <textarea id="f_outcome" placeholder="What works? What will I do?" style="margin-top:10px;"></textarea>
+    </div>
+
+    <button class="btn" id="saveBtn" onclick="saveEntry()">Save entry</button>
+    <button class="btn ghost" style="margin-top:8px;" onclick="clearForm(true)">Clear</button>
+  </div>
+</div>
+
+<!-- SAVED -->
+<div class="wrap" id="viewSaved" style="display:none;">
+  <div id="list"></div>
+</div>
+
+<footer>
+  Entries are stored only on this device, in this browser.<br>
+  Adapted from Carol Vivyan / Padesky (CBT). A tool for reflection, not a substitute for professional support.
+</footer>
+
+<div class="toast" id="toast">Saved</div>
+
+<script>
+  const KEY='thoughtRecords_v1';
+  let editingId=null;
+
+  function todayStr(){const d=new Date();return d.toISOString().slice(0,10);}
+  document.getElementById('f_date').value=todayStr();
+
+  function upd(el,which){
+    const v=el.value;
+    el.style.setProperty('--p',v+'%');
+    document.getElementById(which==='b'?'beforeVal':'afterVal').textContent=v+'%';
+  }
+  upd(document.getElementById('f_before'),'b');
+  upd(document.getElementById('f_after'),'a');
+
+  function load(){try{return JSON.parse(localStorage.getItem(KEY))||[];}catch(e){return[];}}
+  function store(a){localStorage.setItem(KEY,JSON.stringify(a));updateCount();}
+  function updateCount(){const n=load().length;document.getElementById('count').textContent=n?('· '+n):'';}
+
+  function val(id){return document.getElementById(id).value.trim();}
+
+  function saveEntry(){
+    const entry={
+      id: editingId||Date.now(),
+      date: document.getElementById('f_date').value||todayStr(),
+      situation: val('f_situation'),
+      feelings: val('f_feelings'),
+      before: document.getElementById('f_before').value,
+      thought: val('f_thought'),
+      forE: val('f_for'),
+      against: val('f_against'),
+      balanced: val('f_balanced'),
+      after: document.getElementById('f_after').value,
+      outcome: val('f_outcome')
+    };
+    if(!entry.situation && !entry.thought && !entry.feelings){toast('Add a little first');return;}
+    let arr=load();
+    if(editingId){arr=arr.map(e=>e.id===editingId?entry:e);}
+    else{arr.unshift(entry);}
+    store(arr);
+    clearForm(false);
+    toast(editingId?'Updated':'Saved');
+    editingId=null;
+    document.getElementById('saveBtn').textContent='Save entry';
+    showTab('saved');
+  }
+
+  function clearForm(notify){
+    editingId=null;
+    document.getElementById('saveBtn').textContent='Save entry';
+    ['f_situation','f_feelings','f_thought','f_for','f_against','f_balanced','f_outcome'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('f_date').value=todayStr();
+    document.getElementById('f_before').value=50;document.getElementById('f_after').value=50;
+    upd(document.getElementById('f_before'),'b');upd(document.getElementById('f_after'),'a');
+    if(notify)toast('Cleared');
+  }
+
+  function fmtDate(s){const d=new Date(s+'T00:00');if(isNaN(d))return s;return d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});}
+  function esc(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+
+  function render(){
+    const arr=load();const list=document.getElementById('list');
+    if(!arr.length){
+      list.innerHTML='<div class="empty"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 19V5a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg><br>No entries yet.<br>Your saved thoughts will appear here.</div>';
+      return;
+    }
+    list.innerHTML=arr.map(e=>{
+      const drop=(e.before-e.after);
+      return `<div class="entry">
+        <div class="top"><span class="date">${fmtDate(e.date)}</span></div>
+        <div class="trig">${esc(e.situation)||'<i style="color:#a89c8a">No situation noted</i>'}</div>
+        <div class="moods">
+          <span class="pill before">before ${e.before}%</span>
+          <span class="pill after">after ${e.after}%</span>
+          ${drop>0?`<span class="pill" style="background:#eef3ec">↓ ${drop} pts</span>`:''}
+        </div>
+        <div class="entry-actions">
+          <button class="mini" onclick="toggle(${e.id})">View</button>
+          <button class="mini" onclick="edit(${e.id})">Edit</button>
+          <button class="mini del" onclick="del(${e.id})">Delete</button>
+        </div>
+        <div class="detail" id="d${e.id}">
+          ${row('Feelings',e.feelings)}
+          ${row('Unhelpful thought',e.thought)}
+          ${row('Facts for',e.forE)}
+          ${row('Facts against',e.against)}
+          ${row('Balanced perspective',e.balanced)}
+          ${row('Outcome',e.outcome)}
+        </div>
+      </div>`;
+    }).join('');
+  }
+  function row(label,v){if(!v)return'';return `<p><span class="dl">${label}</span>${esc(v)}</p>`;}
+
+  function toggle(id){document.getElementById('d'+id).classList.toggle('show');}
+
+  function edit(id){
+    const e=load().find(x=>x.id===id);if(!e)return;
+    editingId=id;
+    document.getElementById('f_date').value=e.date;
+    document.getElementById('f_situation').value=e.situation;
+    document.getElementById('f_feelings').value=e.feelings;
+    document.getElementById('f_thought').value=e.thought;
+    document.getElementById('f_for').value=e.forE;
+    document.getElementById('f_against').value=e.against;
+    document.getElementById('f_balanced').value=e.balanced;
+    document.getElementById('f_outcome').value=e.outcome;
+    document.getElementById('f_before').value=e.before;
+    document.getElementById('f_after').value=e.after;
+    upd(document.getElementById('f_before'),'b');upd(document.getElementById('f_after'),'a');
+    document.getElementById('saveBtn').textContent='Update entry';
+    showTab('new');window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  function del(id){
+    if(!confirm('Delete this entry?'))return;
+    store(load().filter(e=>e.id!==id));
+    render();toast('Deleted');
+  }
+
+  function showTab(t){
+    const isNew=t==='new';
+    document.getElementById('viewNew').style.display=isNew?'block':'none';
+    document.getElementById('viewSaved').style.display=isNew?'none':'block';
+    document.getElementById('tabNew').classList.toggle('active',isNew);
+    document.getElementById('tabSaved').classList.toggle('active',!isNew);
+    if(!isNew)render();
+  }
+
+  let toastT;
+  function toast(msg){
+    const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+    clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),1800);
+  }
+
+  updateCount();
+
+  // Register service worker for offline support / installability
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(()=>{});
+    });
+  }
+</script>
+</body>
+</html>

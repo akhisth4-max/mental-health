@@ -329,6 +329,8 @@
       <button type="button" class="sound-toggle on" id="vibToggle" onclick="toggleVib()">📳 Vibrate</button>
     </div>
     <p id="ttsNote" style="display:none;color:var(--muted);font-size:12.5px;font-style:italic;margin:10px auto 0;max-width:300px;line-height:1.4;">Tones are playing, but your device has no voice installed for spoken cues. You can add one in Settings → Text-to-speech.</p>
+    <button type="button" class="sound-toggle" id="testBtn" style="margin-top:12px;" onclick="runTest()">Test voice &amp; vibration</button>
+    <p id="diag" style="color:var(--muted);font-size:12px;margin:8px auto 0;max-width:320px;line-height:1.45;"></p>
 
     <div class="b-controls">
       <button class="btn" id="bStart" onclick="toggleBreath()">Begin</button>
@@ -638,6 +640,24 @@
     if(vibOn && navigator.vibrate){ try{ navigator.vibrate(pattern); }catch(e){} }
   }
   function cue(p){ playTone(p.tone); speak(p.say); buzz(fillPattern(p.unit, p.secs)); }
+
+  // diagnostic: report and exercise voice + vibration on demand
+  function runTest(){
+    ensureAudio(); warmUpTTS();
+    const d=document.getElementById('diag');
+    const vibAvail = ('vibrate' in navigator);
+    let vibResult='not supported on this device/app';
+    if(vibAvail){
+      let ok=false; try{ ok=navigator.vibrate([200,100,200]); }catch(e){ ok=false; }
+      vibResult = ok ? 'triggered (you should feel it now)' : 'present but blocked by the device/app';
+    }
+    const voices = (('speechSynthesis' in window) ? (window.speechSynthesis.getVoices()||[]) : []);
+    let voiceResult;
+    if(!('speechSynthesis' in window)) voiceResult='speech not supported';
+    else if(!voices.length) voiceResult='no voice installed — add one in Settings → Text-to-speech';
+    else { voiceResult='speaking now ('+voices.length+' voice'+(voices.length>1?'s':'')+')'; speak('Voice is working'); }
+    d.innerHTML = '🔊 Tones: working<br>🗣 Voice: '+voiceResult+'<br>📳 Vibration: '+vibResult;
+  }
 
   function setOrb(cls,secs){
     const o=orb();

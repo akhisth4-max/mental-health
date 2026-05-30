@@ -166,6 +166,52 @@
   .toast.show{transform:translateX(-50%) translateY(0);}
 
   footer{text-align:center;color:var(--muted);font-size:12px;font-style:italic;padding:24px 18px 8px;line-height:1.5;}
+
+  /* Breathing */
+  .breathe-card{text-align:center;padding:24px 16px 28px;}
+  .breathe-intro{color:var(--muted);font-size:15px;font-style:italic;margin:0 auto 4px;max-width:300px;line-height:1.45;}
+  .orb-wrap{position:relative;width:260px;height:260px;margin:26px auto 10px;display:flex;align-items:center;justify-content:center;}
+  .orb{
+    position:absolute;width:120px;height:120px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #4a6499, var(--navy) 70%);
+    box-shadow:0 10px 40px rgba(27,42,74,.35), inset 0 0 30px rgba(255,255,255,.12);
+    transition:transform var(--bt,4s) cubic-bezier(.4,0,.4,1), background var(--bt,4s) ease;
+    transform:scale(.62);
+  }
+  .orb.inhale{transform:scale(1.18);background:radial-gradient(circle at 35% 30%, #6f8bc0, #33476f 70%);}
+  .orb.hold{transform:scale(1.18);background:radial-gradient(circle at 35% 30%, #c79752, #b5894a 72%);}
+  .orb.exhale{transform:scale(.62);background:radial-gradient(circle at 35% 30%, #4a6499, var(--navy) 70%);}
+  .ring{position:absolute;width:230px;height:230px;border-radius:50%;border:1px solid var(--gold);opacity:.25;}
+  .ring.two{width:185px;height:185px;opacity:.18;}
+  .phase{
+    position:relative;z-index:2;font-family:'Fraunces',serif;font-weight:500;
+    font-size:23px;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.35);pointer-events:none;
+  }
+  .count-num{display:block;font-size:40px;font-weight:600;margin-top:2px;}
+  .b-meta{margin-top:14px;font-family:'Fraunces',serif;color:var(--navy);font-size:15px;}
+  .b-meta span{color:var(--gold);font-weight:600;}
+  .b-controls{display:flex;gap:10px;max-width:340px;margin:20px auto 0;}
+  .b-controls .btn{flex:1;}
+  .round-row{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:14px;flex-wrap:wrap;}
+  .round-label{font-family:'Fraunces',serif;color:var(--navy);font-size:15px;}
+  .stepper{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fffdf8;}
+  .stepper button{
+    width:42px;height:42px;border:none;background:transparent;font-size:22px;color:var(--navy);
+    cursor:pointer;font-family:'Fraunces',serif;line-height:1;
+  }
+  .stepper button:active{background:var(--bg2);}
+  .stepper input{
+    width:48px;height:42px;border:none;border-left:1px solid var(--line);border-right:1px solid var(--line);
+    text-align:center;font-family:'Fraunces',serif;font-weight:600;font-size:18px;color:var(--navy);
+    background:transparent;-moz-appearance:textfield;
+  }
+  .stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+  .stepper input:focus{outline:none;}
+  .sound-toggle{
+    border:1px solid var(--line);background:transparent;border-radius:12px;padding:9px 14px;
+    font-family:'Fraunces',serif;font-size:14px;color:var(--muted);cursor:pointer;
+  }
+  .sound-toggle.on{background:var(--gold-soft);border-color:var(--gold);color:#6f5a34;}
 </style>
 </head>
 <body>
@@ -179,6 +225,7 @@
 <div class="tabs">
   <button class="tab active" id="tabNew" onclick="showTab('new')">New entry</button>
   <button class="tab" id="tabSaved" onclick="showTab('saved')">Saved <span id="count"></span></button>
+  <button class="tab" id="tabBreathe" onclick="showTab('breathe')">Breathe</button>
 </div>
 
 <!-- NEW ENTRY -->
@@ -248,7 +295,45 @@
 
 <!-- SAVED -->
 <div class="wrap" id="viewSaved" style="display:none;">
+  <div id="backupBar" style="display:flex;gap:8px;margin:14px 0 4px;">
+    <button class="mini" style="flex:1" onclick="exportEntries()">⬇ Backup</button>
+    <button class="mini" style="flex:1" onclick="document.getElementById('importFile').click()">⬆ Restore</button>
+    <input type="file" id="importFile" accept="application/json,.json" style="display:none" onchange="importEntries(event)">
+  </div>
   <div id="list"></div>
+</div>
+
+<!-- BREATHE -->
+<div class="wrap" id="viewBreathe" style="display:none;">
+  <div class="card breathe-card">
+    <p class="breathe-intro">The 4-7-8 breath: inhale for 4, hold for 7, exhale for 8. A few rounds can settle the nervous system.</p>
+
+    <div class="orb-wrap">
+      <div class="ring"></div>
+      <div class="ring two"></div>
+      <div class="orb exhale" id="orb"></div>
+      <div class="phase" id="phaseText">Ready<span class="count-num" id="countNum">4-7-8</span></div>
+    </div>
+
+    <div class="b-meta">Round <span id="roundNum">0</span> of <span id="roundTotal">4</span></div>
+
+    <div class="round-row">
+      <span class="round-label">Rounds</span>
+      <div class="stepper">
+        <button type="button" onclick="bumpRounds(-1)" aria-label="fewer">&minus;</button>
+        <input type="number" id="roundsInput" min="1" max="99" value="4" inputmode="numeric"
+               onchange="syncRounds()" oninput="syncRounds()">
+        <button type="button" onclick="bumpRounds(1)" aria-label="more">&plus;</button>
+      </div>
+      <button type="button" class="sound-toggle on" id="soundToggle" onclick="toggleSound()">🔊 Sound</button>
+      <button type="button" class="sound-toggle on" id="vibToggle" onclick="toggleVib()">📳 Vibrate</button>
+    </div>
+    <p id="ttsNote" style="display:none;color:var(--muted);font-size:12.5px;font-style:italic;margin:10px auto 0;max-width:300px;line-height:1.4;">Tones are playing, but your device has no voice installed for spoken cues. You can add one in Settings → Text-to-speech.</p>
+
+    <div class="b-controls">
+      <button class="btn" id="bStart" onclick="toggleBreath()">Begin</button>
+    </div>
+  </div>
 </div>
 
 <footer>
@@ -354,6 +439,38 @@
 
   function toggle(id){document.getElementById('d'+id).classList.toggle('show');}
 
+  function exportEntries(){
+    const arr=load();
+    if(!arr.length){toast('Nothing to back up yet');return;}
+    const blob=new Blob([JSON.stringify(arr,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    const stamp=new Date().toISOString().slice(0,10);
+    a.href=url;a.download='thought-record-backup-'+stamp+'.json';
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    toast('Backup saved to Downloads');
+  }
+
+  function importEntries(ev){
+    const file=ev.target.files[0];if(!file)return;
+    const reader=new FileReader();
+    reader.onload=()=>{
+      try{
+        const incoming=JSON.parse(reader.result);
+        if(!Array.isArray(incoming))throw 0;
+        const current=load();
+        const ids=new Set(current.map(e=>e.id));
+        const merged=current.concat(incoming.filter(e=>e&&!ids.has(e.id)));
+        merged.sort((a,b)=>b.id-a.id);
+        store(merged);render();
+        toast('Restored '+incoming.length+' entr'+(incoming.length===1?'y':'ies'));
+      }catch(e){toast('Couldn\u2019t read that file');}
+      ev.target.value='';
+    };
+    reader.readAsText(file);
+  }
+
   function edit(id){
     const e=load().find(x=>x.id===id);if(!e)return;
     editingId=id;
@@ -379,18 +496,226 @@
   }
 
   function showTab(t){
-    const isNew=t==='new';
-    document.getElementById('viewNew').style.display=isNew?'block':'none';
-    document.getElementById('viewSaved').style.display=isNew?'none':'block';
-    document.getElementById('tabNew').classList.toggle('active',isNew);
-    document.getElementById('tabSaved').classList.toggle('active',!isNew);
-    if(!isNew)render();
+    document.getElementById('viewNew').style.display   = t==='new'?'block':'none';
+    document.getElementById('viewSaved').style.display = t==='saved'?'block':'none';
+    document.getElementById('viewBreathe').style.display = t==='breathe'?'block':'none';
+    document.getElementById('tabNew').classList.toggle('active', t==='new');
+    document.getElementById('tabSaved').classList.toggle('active', t==='saved');
+    document.getElementById('tabBreathe').classList.toggle('active', t==='breathe');
+    if(t!=='breathe') stopBreath();
+    if(t==='saved') render();
   }
 
   let toastT;
   function toast(msg){
     const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
     clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),1800);
+  }
+
+  /* ---- 4-7-8 Breathing ---- */
+  const PHASES=[
+    // unit = one repeat of [vibrate, pause] in ms; it's tiled across the whole phase
+    {name:'Breathe in', cls:'inhale', secs:4, say:'Breathe in', tone:392, unit:[300,300]},      // slow steady pulse
+    {name:'Hold',       cls:'hold',   secs:7, say:'Hold',       tone:523, unit:[70,180]},        // rapid light taps
+    {name:'Breathe out',cls:'exhale', secs:8, say:'Breathe out',tone:294, unit:[600,200]}        // long deep buzz
+  ];
+
+  // tile a [on,off] unit to fill `secs` seconds -> a vibration pattern array
+  function fillPattern(unit, secs){
+    const total=secs*1000;
+    const pat=[]; let t=0;
+    while(t < total){
+      const on = Math.min(unit[0], total - t); pat.push(on); t += on;
+      if(t >= total) break;
+      const off = Math.min(unit[1], total - t); pat.push(off); t += off;
+    }
+    return pat;
+  }
+  let bRunning=false, bRounds=4, bRound=0, bPhase=0, bRemain=0, bTimer=null;
+  let soundOn=true, audioCtx=null, vibOn=true;
+  const orb=()=>document.getElementById('orb');
+
+  function disablePicker(d){
+    document.getElementById('roundsInput').disabled=d;
+    document.querySelectorAll('.stepper button').forEach(b=>b.disabled=d);
+  }
+
+  function bumpRounds(delta){
+    if(bRunning) return;
+    const inp=document.getElementById('roundsInput');
+    let v=parseInt(inp.value||'4',10)+delta;
+    if(isNaN(v)) v=4;
+    v=Math.max(1,Math.min(99,v));
+    inp.value=v; syncRounds();
+  }
+  function syncRounds(){
+    if(bRunning) return;
+    const inp=document.getElementById('roundsInput');
+    let v=parseInt(inp.value,10);
+    if(isNaN(v)||v<1) v=1; if(v>99) v=99;
+    bRounds=v;
+    document.getElementById('roundTotal').textContent=v;
+  }
+
+  function toggleSound(){
+    soundOn=!soundOn;
+    const t=document.getElementById('soundToggle');
+    t.classList.toggle('on',soundOn);
+    t.textContent=(soundOn?'🔊':'🔇')+' Sound';
+    if(soundOn){ ensureAudio(); warmUpTTS(); }
+  }
+
+  function ensureAudio(){
+    if(!audioCtx){
+      try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}
+    }
+    if(audioCtx && audioCtx.state==='suspended') audioCtx.resume();
+  }
+
+  // soft sine tone with gentle fade — pleasant, not jarring
+  function playTone(freq){
+    if(!soundOn||!audioCtx) return;
+    const now=audioCtx.currentTime;
+    const osc=audioCtx.createOscillator();
+    const gain=audioCtx.createGain();
+    osc.type='sine'; osc.frequency.value=freq;
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    gain.gain.setValueAtTime(0,now);
+    gain.gain.linearRampToValueAtTime(0.18, now+0.06);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now+0.55);
+    osc.start(now); osc.stop(now+0.6);
+  }
+
+  // spoken cue using the device's voice
+  let ttsVoice=null, ttsReady=false, ttsSupported=('speechSynthesis' in window);
+
+  function loadVoices(){
+    if(!ttsSupported) return;
+    const voices=window.speechSynthesis.getVoices()||[];
+    if(!voices.length) return;
+    // prefer an English voice; fall back to the first available
+    ttsVoice = voices.find(v=>/^en[-_]/i.test(v.lang)) || voices.find(v=>/en/i.test(v.lang)) || voices[0];
+    ttsReady=true;
+  }
+  if(ttsSupported){
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged=loadVoices; // Android often loads them late
+  }
+
+  // a quiet warm-up so the very first real cue isn't swallowed
+  function warmUpTTS(){
+    if(!ttsSupported) return;
+    try{
+      window.speechSynthesis.resume();
+      if(!ttsReady) loadVoices();
+      const u=new SpeechSynthesisUtterance(' ');
+      u.volume=0; window.speechSynthesis.speak(u);
+    }catch(e){}
+  }
+
+  function speak(text){
+    if(!soundOn || !ttsSupported) return;
+    try{
+      window.speechSynthesis.resume();
+      window.speechSynthesis.cancel();
+      const u=new SpeechSynthesisUtterance(text);
+      if(!ttsReady) loadVoices();
+      if(ttsVoice){ u.voice=ttsVoice; u.lang=ttsVoice.lang; } else { u.lang='en-US'; }
+      u.rate=0.9; u.pitch=1; u.volume=1;
+      window.speechSynthesis.speak(u);
+    }catch(e){}
+  }
+
+  function toggleVib(){
+    vibOn=!vibOn;
+    const t=document.getElementById('vibToggle');
+    t.classList.toggle('on',vibOn);
+    t.textContent=(vibOn?'📳':'📴')+' Vibrate';
+    if(!vibOn && navigator.vibrate){ try{navigator.vibrate(0);}catch(e){} }
+  }
+
+  function buzz(pattern){
+    if(vibOn && navigator.vibrate){ try{ navigator.vibrate(pattern); }catch(e){} }
+  }
+  function cue(p){ playTone(p.tone); speak(p.say); buzz(fillPattern(p.unit, p.secs)); }
+
+  function setOrb(cls,secs){
+    const o=orb();
+    o.style.setProperty('--bt', secs+'s');
+    o.classList.remove('inhale','hold','exhale');
+    void o.offsetWidth;
+    o.classList.add(cls);
+  }
+
+  function startPhase(){
+    const p=PHASES[bPhase];
+    bRemain=p.secs;
+    document.getElementById('phaseText').firstChild.textContent=p.name;
+    document.getElementById('countNum').textContent=bRemain;
+    setOrb(p.cls,p.secs);
+    cue(p);
+  }
+
+  function tick(){
+    bRemain--;
+    if(bRemain>0){
+      document.getElementById('countNum').textContent=bRemain;
+      return;
+    }
+    bPhase++;
+    if(bPhase>=PHASES.length){
+      bPhase=0; bRound++;
+      document.getElementById('roundNum').textContent=bRound;
+      if(bRound>=bRounds){ finishBreath(); return; }
+    }
+    startPhase();
+  }
+
+  function toggleBreath(){ bRunning ? stopBreath() : startBreath(); }
+
+  function startBreath(){
+    syncRounds();
+    ensureAudio();
+    warmUpTTS();
+    // surface a hint if the device genuinely has no TTS voice
+    const note=document.getElementById('ttsNote');
+    if(note){
+      const hasVoice = ttsSupported && (window.speechSynthesis.getVoices()||[]).length>0;
+      note.style.display = hasVoice ? 'none' : 'block';
+    }
+    bRunning=true; bPhase=0; bRound=1;
+    document.getElementById('roundNum').textContent=bRound;
+    document.getElementById('bStart').textContent='Stop';
+    disablePicker(true);
+    startPhase();
+    bTimer=setInterval(tick,1000);
+  }
+
+  function stopBreath(){
+    if(bTimer) clearInterval(bTimer);
+    bTimer=null; bRunning=false;
+    try{window.speechSynthesis.cancel();}catch(e){}
+    if(navigator.vibrate) try{navigator.vibrate(0);}catch(e){}
+    document.getElementById('bStart').textContent='Begin';
+    disablePicker(false);
+    document.getElementById('phaseText').firstChild.textContent='Ready';
+    document.getElementById('countNum').textContent='4-7-8';
+    document.getElementById('roundNum').textContent='0';
+    setOrb('exhale',1);
+  }
+
+  function finishBreath(){
+    if(bTimer) clearInterval(bTimer);
+    bTimer=null; bRunning=false;
+    document.getElementById('bStart').textContent='Begin';
+    disablePicker(false);
+    document.getElementById('phaseText').firstChild.textContent='Done';
+    document.getElementById('countNum').textContent='\u2713';
+    setOrb('exhale',2);
+    if(soundOn) playTone(659);
+    speak('Well done');
+    toast('Nicely done');
+    buzz([120,80,120,80,300]);
   }
 
   updateCount();

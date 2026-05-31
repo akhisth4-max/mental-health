@@ -212,6 +212,12 @@
     font-family:'Fraunces',serif;font-size:14px;color:var(--muted);cursor:pointer;
   }
   .sound-toggle.on{background:var(--gold-soft);border-color:var(--gold);color:#6f5a34;}
+  .tech-pick{display:inline-flex;gap:6px;margin-bottom:14px;background:var(--bg2);padding:5px;border-radius:14px;}
+  .tech-pick button{
+    border:none;background:transparent;border-radius:10px;padding:8px 16px;
+    font-family:'Fraunces',serif;font-size:15px;font-weight:500;color:var(--muted);cursor:pointer;transition:.18s;
+  }
+  .tech-pick button.on{background:var(--navy);color:#fff;box-shadow:0 2px 8px rgba(27,42,74,.25);}
 </style>
 </head>
 <body>
@@ -306,7 +312,12 @@
 <!-- BREATHE -->
 <div class="wrap" id="viewBreathe" style="display:none;">
   <div class="card breathe-card">
-    <p class="breathe-intro">The 4-7-8 breath: inhale for 4, hold for 7, exhale for 8. A few rounds can settle the nervous system.</p>
+    <div class="tech-pick" id="techPick">
+      <button type="button" class="on" onclick="setTech('478',this)">4-7-8</button>
+      <button type="button" onclick="setTech('box',this)">Box</button>
+      <button type="button" onclick="setTech('belly',this)">Belly</button>
+    </div>
+    <p class="breathe-intro" id="breatheIntro">The 4-7-8 breath: inhale for 4, hold for 7, exhale for 8. A few rounds can settle the nervous system.</p>
 
     <div class="orb-wrap">
       <div class="ring"></div>
@@ -514,13 +525,56 @@
     clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),1800);
   }
 
-  /* ---- 4-7-8 Breathing ---- */
-  const PHASES=[
-    // unit = one repeat of [vibrate, pause] in ms; it's tiled across the whole phase
-    {name:'Breathe in', cls:'inhale', secs:4, say:'Breathe in', tone:392, unit:[300,300]},      // slow steady pulse
-    {name:'Hold',       cls:'hold',   secs:7, say:'Hold',       tone:523, unit:[70,180]},        // rapid light taps
-    {name:'Breathe out',cls:'exhale', secs:8, say:'Breathe out',tone:294, unit:[600,200]}        // long deep buzz
-  ];
+  /* ---- Breathing techniques ---- */
+  // each phase: name, orb class (inhale/hold/exhale), seconds, spoken cue, tone Hz, vibration unit [on,off]
+  const TECHNIQUES={
+    '478':{
+      label:'4-7-8', short:'4-7-8',
+      intro:'The 4-7-8 breath: inhale for 4, hold for 7, exhale for 8. A few rounds can settle the nervous system.',
+      defaultRounds:4,
+      phases:[
+        {name:'Breathe in', cls:'inhale', secs:4, say:'Breathe in', tone:392, unit:[300,300]},
+        {name:'Hold',       cls:'hold',   secs:7, say:'Hold',       tone:523, unit:[70,180]},
+        {name:'Breathe out',cls:'exhale', secs:8, say:'Breathe out',tone:294, unit:[600,200]}
+      ]
+    },
+    'box':{
+      label:'Box', short:'4-4-4-4',
+      intro:'Box breathing: in for 4, hold for 4, out for 4, hold empty for 4. Good for regaining focus and a calm, steady mind.',
+      defaultRounds:5,
+      phases:[
+        {name:'Breathe in', cls:'inhale', secs:4, say:'Breathe in', tone:392, unit:[300,300]},
+        {name:'Hold',       cls:'hold',   secs:4, say:'Hold',       tone:523, unit:[70,180]},
+        {name:'Breathe out',cls:'exhale', secs:4, say:'Breathe out',tone:294, unit:[600,200]},
+        {name:'Hold empty', cls:'exhale', secs:4, say:'Hold',       tone:330, unit:[70,180]}
+      ]
+    },
+    'belly':{
+      label:'Belly', short:'4-6',
+      intro:'Diaphragmatic (belly) breathing: a hand on your belly, breathe in slowly through the nose so the belly rises, then out gently through pursed lips. Calms the fight-or-flight response.',
+      defaultRounds:8,
+      phases:[
+        {name:'Breathe in', cls:'inhale', secs:4, say:'Breathe in, belly out', tone:392, unit:[300,300]},
+        {name:'Breathe out',cls:'exhale', secs:6, say:'Breathe out slowly',    tone:294, unit:[600,200]}
+      ]
+    }
+  };
+  let techKey='478';
+  let PHASES = TECHNIQUES[techKey].phases;
+
+  function setTech(key, btn){
+    if(bRunning) return;
+    techKey=key;
+    PHASES=TECHNIQUES[key].phases;
+    document.querySelectorAll('#techPick button').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+    document.getElementById('breatheIntro').textContent=TECHNIQUES[key].intro;
+    document.getElementById('countNum').textContent=TECHNIQUES[key].short;
+    // reset rounds to a sensible default for the technique
+    const inp=document.getElementById('roundsInput');
+    inp.value=TECHNIQUES[key].defaultRounds;
+    syncRounds();
+  }
 
   // tile a [on,off] unit to fill `secs` seconds -> a vibration pattern array
   function fillPattern(unit, secs){
@@ -540,6 +594,7 @@
   function disablePicker(d){
     document.getElementById('roundsInput').disabled=d;
     document.querySelectorAll('.stepper button').forEach(b=>b.disabled=d);
+    document.querySelectorAll('#techPick button').forEach(b=>b.disabled=d);
   }
 
   function bumpRounds(delta){

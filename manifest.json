@@ -1,19 +1,1086 @@
-{
-  "name": "Thought Record",
-  "short_name": "Thoughts",
-  "description": "A quiet space to untangle a thought — a 7-column CBT thought record.",
-  "start_url": "./index.html",
-  "scope": "./",
-  "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#1b2a4a",
-  "theme_color": "#1b2a4a",
-  "lang": "en",
-  "categories": ["health", "lifestyle", "productivity"],
-  "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-192-mask.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
-    { "src": "icons/icon-512-mask.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
-  ]
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1b2a4a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Thought Record</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4efe6;
+    --bg2:#ece4d6;
+    --ink:#2a2620;
+    --muted:#7a7064;
+    --line:#d9cfbe;
+    --navy:#1b2a4a;
+    --navy2:#33476f;
+    --gold:#b5894a;
+    --gold-soft:#e8d9bc;
+    --card:#fbf8f1;
+    --shadow:0 8px 30px rgba(40,30,15,.08);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Newsreader',Georgia,serif;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, #fbf6ec 0%, transparent 60%),
+      var(--bg);
+    color:var(--ink);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:90px;
+  }
+  .wrap{max-width:680px;margin:0 auto;padding:0 18px;}
+
+  header{
+    padding:26px 18px 18px;
+    text-align:center;
+    position:relative;
+  }
+  header h1{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:30px;
+    letter-spacing:.3px;
+    margin:0;
+    color:var(--navy);
+  }
+  header .sub{
+    font-style:italic;
+    color:var(--muted);
+    font-size:15px;
+    margin-top:4px;
+  }
+  .rule{height:1px;background:linear-gradient(90deg,transparent,var(--gold) 50%,transparent);margin:14px auto 0;max-width:160px;opacity:.6;}
+
+  /* Tabs */
+  .tabs{display:flex;gap:6px;margin:18px auto 4px;max-width:680px;padding:0 14px;}
+  .tab{
+    flex:1;text-align:center;padding:11px 4px;border-radius:12px;
+    font-family:'Fraunces',serif;font-size:14.5px;font-weight:500;
+    background:transparent;color:var(--muted);border:1px solid transparent;
+    cursor:pointer;transition:.2s;white-space:nowrap;
+  }
+  .tab.active{background:var(--navy);color:#fff;box-shadow:var(--shadow);}
+
+  /* Form card */
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:18px 16px;
+    margin:14px 0;
+    box-shadow:var(--shadow);
+  }
+  .field{margin-bottom:20px;}
+  .field:last-child{margin-bottom:6px;}
+  .label{
+    display:block;
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:16px;
+    color:var(--navy);
+    margin-bottom:2px;
+  }
+  .hint{display:block;color:var(--muted);font-size:13.5px;font-style:italic;margin-bottom:8px;line-height:1.35;}
+  textarea,input[type=text]{
+    width:100%;border:1px solid var(--line);border-radius:12px;
+    background:#fffdf8;padding:12px 13px;font-family:'Newsreader',serif;
+    font-size:16px;color:var(--ink);resize:vertical;line-height:1.5;
+  }
+  textarea{min-height:74px;}
+  textarea:focus,input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft);}
+
+  .stop{
+    background:linear-gradient(180deg,#fff8ec,#fbf1dd);
+    border:1px solid var(--gold-soft);
+    border-left:3px solid var(--gold);
+    border-radius:12px;padding:11px 13px;margin-bottom:8px;
+    font-size:14px;color:#6f5a34;font-style:italic;
+  }
+  .stop b{font-style:normal;color:var(--gold);}
+
+  /* Slider */
+  .slider-row{display:flex;align-items:center;gap:14px;margin-top:4px;}
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;flex:1;height:6px;border-radius:6px;
+    background:linear-gradient(90deg,var(--gold) var(--p,0%),var(--line) var(--p,0%));
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:24px;height:24px;border-radius:50%;
+    background:var(--navy);border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.2);cursor:pointer;
+  }
+  input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--navy);border:3px solid #fff;cursor:pointer;}
+  .pct{font-family:'Fraunces',serif;font-weight:600;font-size:20px;color:var(--navy);min-width:54px;text-align:right;}
+
+  .date-input{font-family:'Newsreader',serif;}
+
+  /* Buttons */
+  .btn{
+    display:block;width:100%;border:none;border-radius:14px;
+    padding:15px;font-family:'Fraunces',serif;font-size:17px;font-weight:600;
+    background:var(--navy);color:#fff;cursor:pointer;letter-spacing:.3px;
+    box-shadow:var(--shadow);transition:.15s;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn.gold{background:linear-gradient(180deg,#c79752,#b5894a);}
+  .btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line);box-shadow:none;font-size:15px;padding:12px;}
+
+  /* Entries list */
+  .entry{
+    background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:15px 16px;margin:12px 0;box-shadow:var(--shadow);
+  }
+  .entry .top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:8px;}
+  .entry .date{font-family:'Fraunces',serif;font-weight:600;color:var(--navy);font-size:15px;}
+  .entry .trig{font-size:17px;margin:2px 0 10px;}
+  .moods{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+  .pill{font-size:13px;background:var(--bg2);border:1px solid var(--line);border-radius:20px;padding:3px 11px;color:#5a5347;}
+  .pill.before{background:#fbece2;border-color:#eccdb8;color:#9a5a32;}
+  .pill.after{background:#e8efe2;border-color:#c3d6b6;color:#4f6b3a;}
+  .entry-actions{display:flex;gap:8px;margin-top:6px;}
+  .mini{flex:1;padding:9px;border-radius:10px;border:1px solid var(--line);background:transparent;font-family:'Fraunces',serif;font-size:14px;color:var(--muted);cursor:pointer;}
+  .mini.del{color:#a4503e;border-color:#e3c4bb;}
+  .detail{font-size:15px;color:#4a443a;border-top:1px dashed var(--line);margin-top:8px;padding-top:8px;display:none;}
+  .detail.show{display:block;}
+  .detail p{margin:6px 0;}
+  .detail .dl{font-family:'Fraunces',serif;font-weight:600;color:var(--navy);font-size:13.5px;display:block;}
+
+  .empty{text-align:center;color:var(--muted);font-style:italic;padding:50px 20px;}
+  .empty svg{opacity:.4;margin-bottom:10px;}
+
+  .toast{
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);
+    background:var(--navy);color:#fff;padding:12px 22px;border-radius:30px;
+    font-family:'Fraunces',serif;font-size:15px;box-shadow:0 8px 24px rgba(0,0,0,.25);
+    transition:transform .3s cubic-bezier(.2,.9,.3,1.2);z-index:50;
+  }
+  .toast.show{transform:translateX(-50%) translateY(0);}
+
+  footer{text-align:center;color:var(--muted);font-size:12px;font-style:italic;padding:24px 18px 8px;line-height:1.5;}
+
+  /* Health */
+  .seg{display:flex;gap:6px;background:var(--bg2);padding:5px;border-radius:14px;margin:14px 0 4px;}
+  .seg button{flex:1;border:none;background:transparent;border-radius:10px;padding:10px 6px;font-family:'Fraunces',serif;font-size:15px;font-weight:500;color:var(--muted);cursor:pointer;}
+  .seg button.on{background:var(--navy);color:#fff;box-shadow:0 2px 8px rgba(27,42,74,.22);}
+  .seg.sub{margin:4px 0 0;}
+  .seg.sub button{font-size:13.5px;padding:8px 4px;}
+  .hcard .field{margin-bottom:14px;}
+  .label.sm{font-size:13.5px;margin-bottom:4px;}
+  .trio{display:flex;gap:8px;}
+  .trio>div{flex:1;display:flex;flex-direction:column;}
+  .duo{display:flex;gap:10px;}
+  .duo>div{flex:1;display:flex;flex-direction:column;}
+  .hcard input[type=number]{width:100%;border:1px solid var(--line);border-radius:12px;background:#fffdf8;padding:12px 10px;font-family:'Newsreader',serif;font-size:18px;color:var(--ink);text-align:center;-moz-appearance:textfield;}
+  .hcard input[type=number]::-webkit-outer-spin-button,.hcard input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+  .hcard input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft);}
+  .unit{font-size:11px;color:var(--muted);text-align:center;margin-top:3px;font-style:italic;}
+  .graph-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:8px;}
+  .graph-title{font-family:'Fraunces',serif;font-weight:600;color:var(--navy);font-size:17px;}
+  .range-pick{display:inline-flex;gap:4px;}
+  .range-pick button{border:1px solid var(--line);background:transparent;border-radius:9px;padding:5px 10px;font-family:'Fraunces',serif;font-size:13px;color:var(--muted);cursor:pointer;}
+  .range-pick button.on{background:var(--navy);color:#fff;border-color:var(--navy);}
+  #chartWrap{width:100%;}
+  #chart{width:100%;height:auto;display:block;}
+  .legend{display:flex;gap:16px;justify-content:center;margin-top:8px;font-size:13px;color:var(--muted);flex-wrap:wrap;}
+  .legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:middle;}
+  .hrow{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0;box-shadow:var(--shadow);display:flex;justify-content:space-between;align-items:center;gap:10px;}
+  .hrow .hwhen{font-family:'Fraunces',serif;color:var(--navy);font-size:13.5px;}
+  .hrow .hval{font-family:'Fraunces',serif;font-weight:600;font-size:17px;color:var(--ink);}
+  .hrow .hsub{font-size:12.5px;color:var(--muted);}
+  .hrow .hnote{font-size:12.5px;color:var(--muted);font-style:italic;margin-top:2px;}
+  .hdel{border:1px solid #e3c4bb;color:#a4503e;background:transparent;border-radius:9px;padding:7px 10px;font-family:'Fraunces',serif;font-size:13px;cursor:pointer;flex-shrink:0;}
+  .tag{display:inline-block;font-size:11px;border-radius:20px;padding:2px 9px;margin-left:6px;vertical-align:middle;}
+  .tag.fasting{background:#e8efe2;color:#4f6b3a;}
+  .tag.pp{background:#fbece2;color:#9a5a32;}
+  .tag.random{background:#e7ecf5;color:#3a4f78;}
+
+  /* Breathing */
+  .breathe-card{text-align:center;padding:24px 16px 28px;}
+  .breathe-intro{color:var(--muted);font-size:15px;font-style:italic;margin:0 auto 4px;max-width:300px;line-height:1.45;}
+  .orb-wrap{position:relative;width:260px;height:260px;margin:26px auto 10px;display:flex;align-items:center;justify-content:center;}
+  .orb{
+    position:absolute;width:120px;height:120px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #4a6499, var(--navy) 70%);
+    box-shadow:0 10px 40px rgba(27,42,74,.35), inset 0 0 30px rgba(255,255,255,.12);
+    transition:transform var(--bt,4s) cubic-bezier(.4,0,.4,1), background var(--bt,4s) ease;
+    transform:scale(.62);
+  }
+  .orb.inhale{transform:scale(1.18);background:radial-gradient(circle at 35% 30%, #6f8bc0, #33476f 70%);}
+  .orb.hold{transform:scale(1.18);background:radial-gradient(circle at 35% 30%, #c79752, #b5894a 72%);}
+  .orb.exhale{transform:scale(.62);background:radial-gradient(circle at 35% 30%, #4a6499, var(--navy) 70%);}
+  .ring{position:absolute;width:230px;height:230px;border-radius:50%;border:1px solid var(--gold);opacity:.25;}
+  .ring.two{width:185px;height:185px;opacity:.18;}
+  .phase{
+    position:relative;z-index:2;font-family:'Fraunces',serif;font-weight:500;
+    font-size:23px;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.35);pointer-events:none;
+  }
+  .count-num{display:block;font-size:40px;font-weight:600;margin-top:2px;}
+  .b-meta{margin-top:14px;font-family:'Fraunces',serif;color:var(--navy);font-size:15px;}
+  .b-meta span{color:var(--gold);font-weight:600;}
+  .b-controls{display:flex;gap:10px;max-width:340px;margin:20px auto 0;}
+  .b-controls .btn{flex:1;}
+  .round-row{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:14px;flex-wrap:wrap;}
+  .round-label{font-family:'Fraunces',serif;color:var(--navy);font-size:15px;}
+  .stepper{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fffdf8;}
+  .stepper button{
+    width:42px;height:42px;border:none;background:transparent;font-size:22px;color:var(--navy);
+    cursor:pointer;font-family:'Fraunces',serif;line-height:1;
+  }
+  .stepper button:active{background:var(--bg2);}
+  .stepper input{
+    width:48px;height:42px;border:none;border-left:1px solid var(--line);border-right:1px solid var(--line);
+    text-align:center;font-family:'Fraunces',serif;font-weight:600;font-size:18px;color:var(--navy);
+    background:transparent;-moz-appearance:textfield;
+  }
+  .stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+  .stepper input:focus{outline:none;}
+  .sound-toggle{
+    border:1px solid var(--line);background:transparent;border-radius:12px;padding:9px 14px;
+    font-family:'Fraunces',serif;font-size:14px;color:var(--muted);cursor:pointer;
+  }
+  .sound-toggle.on{background:var(--gold-soft);border-color:var(--gold);color:#6f5a34;}
+  .tech-pick{display:inline-flex;gap:6px;margin-bottom:14px;background:var(--bg2);padding:5px;border-radius:14px;}
+  .tech-pick button{
+    border:none;background:transparent;border-radius:10px;padding:8px 16px;
+    font-family:'Fraunces',serif;font-size:15px;font-weight:500;color:var(--muted);cursor:pointer;transition:.18s;
+  }
+  .tech-pick button.on{background:var(--navy);color:#fff;box-shadow:0 2px 8px rgba(27,42,74,.25);}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Thought Record</h1>
+  <div class="sub">a quiet space to untangle a thought</div>
+  <div class="rule"></div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" id="tabNew" onclick="showTab('new')">New entry</button>
+  <button class="tab" id="tabSaved" onclick="showTab('saved')">Saved <span id="count"></span></button>
+  <button class="tab" id="tabBreathe" onclick="showTab('breathe')">Breathe</button>
+  <button class="tab" id="tabHealth" onclick="showTab('health')">Health</button>
+</div>
+
+<!-- NEW ENTRY -->
+<div class="wrap" id="viewNew">
+  <div class="card">
+    <div class="field">
+      <label class="label">Date</label>
+      <input type="date" id="f_date" class="date-input" style="width:auto;">
+    </div>
+
+    <div class="field">
+      <label class="label">1 · Situation / Trigger</label>
+      <span class="hint">What happened? Where, when, who with?</span>
+      <textarea id="f_situation" placeholder="Describe what set this off..."></textarea>
+    </div>
+
+    <div class="field">
+      <label class="label">2 · Feelings</label>
+      <span class="hint">Name the emotions and body sensations.</span>
+      <textarea id="f_feelings" placeholder="e.g. anxious, tight chest, restless..."></textarea>
+      <label class="label" style="font-size:14px;margin-top:12px;">Emotion intensity — before</label>
+      <div class="slider-row">
+        <input type="range" id="f_before" min="0" max="100" value="50" oninput="upd(this,'b')">
+        <span class="pct" id="beforeVal">50%</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="label">3 · Unhelpful Thought / Image</label>
+      <span class="hint">What went through your mind? What did it mean about you?</span>
+      <textarea id="f_thought" placeholder="The automatic thought..."></textarea>
+    </div>
+
+    <div class="field">
+      <label class="label">4 · Facts that support it</label>
+      <span class="hint">What facts make this feel true?</span>
+      <textarea id="f_for" placeholder="Evidence for..."></textarea>
+    </div>
+
+    <div class="field">
+      <label class="label">5 · Facts against it</label>
+      <span class="hint">What shows it isn't totally true? Opinion vs. fact?</span>
+      <textarea id="f_against" placeholder="Evidence against..."></textarea>
+    </div>
+
+    <div class="field">
+      <label class="label">6 · Balanced perspective</label>
+      <div class="stop"><b>STOP.</b> Take a breath. What would you say to a friend? What's the bigger picture?</div>
+      <textarea id="f_balanced" placeholder="A fairer, wiser way to see it..."></textarea>
+    </div>
+
+    <div class="field">
+      <label class="label">7 · Outcome</label>
+      <span class="hint">Re-rate the emotion. What can you do now?</span>
+      <label class="label" style="font-size:14px;">Emotion intensity — after</label>
+      <div class="slider-row">
+        <input type="range" id="f_after" min="0" max="100" value="50" oninput="upd(this,'a')">
+        <span class="pct" id="afterVal">50%</span>
+      </div>
+      <textarea id="f_outcome" placeholder="What works? What will I do?" style="margin-top:10px;"></textarea>
+    </div>
+
+    <button class="btn" id="saveBtn" onclick="saveEntry()">Save entry</button>
+    <button class="btn ghost" style="margin-top:8px;" onclick="clearForm(true)">Clear</button>
+  </div>
+</div>
+
+<!-- SAVED -->
+<div class="wrap" id="viewSaved" style="display:none;">
+  <div id="backupBar" style="display:flex;gap:8px;margin:14px 0 4px;">
+    <button class="mini" style="flex:1" onclick="exportEntries()">⬇ Backup</button>
+    <button class="mini" style="flex:1" onclick="document.getElementById('importFile').click()">⬆ Restore</button>
+    <input type="file" id="importFile" accept="application/json,.json" style="display:none" onchange="importEntries(event)">
+  </div>
+  <div id="list"></div>
+</div>
+
+<!-- BREATHE -->
+<div class="wrap" id="viewBreathe" style="display:none;">
+  <div class="card breathe-card">
+    <div class="tech-pick" id="techPick">
+      <button type="button" class="on" onclick="setTech('478',this)">4-7-8</button>
+      <button type="button" onclick="setTech('box',this)">Box</button>
+      <button type="button" onclick="setTech('belly',this)">Belly</button>
+    </div>
+    <p class="breathe-intro" id="breatheIntro">The 4-7-8 breath: inhale for 4, hold for 7, exhale for 8. A few rounds can settle the nervous system.</p>
+
+    <div class="orb-wrap">
+      <div class="ring"></div>
+      <div class="ring two"></div>
+      <div class="orb exhale" id="orb"></div>
+      <div class="phase" id="phaseText">Ready<span class="count-num" id="countNum">4-7-8</span></div>
+    </div>
+
+    <div class="b-meta">Round <span id="roundNum">0</span> of <span id="roundTotal">4</span></div>
+
+    <div class="round-row">
+      <span class="round-label">Rounds</span>
+      <div class="stepper">
+        <button type="button" onclick="bumpRounds(-1)" aria-label="fewer">&minus;</button>
+        <input type="number" id="roundsInput" min="1" max="99" value="4" inputmode="numeric"
+               onchange="syncRounds()" oninput="syncRounds()">
+        <button type="button" onclick="bumpRounds(1)" aria-label="more">&plus;</button>
+      </div>
+      <button type="button" class="sound-toggle on" id="soundToggle" onclick="toggleSound()">🔊 Sound</button>
+      <button type="button" class="sound-toggle on" id="vibToggle" onclick="toggleVib()">📳 Vibrate</button>
+    </div>
+    <p id="ttsNote" style="display:none;color:var(--muted);font-size:12.5px;font-style:italic;margin:10px auto 0;max-width:300px;line-height:1.4;">Tones are playing, but your device has no voice installed for spoken cues. You can add one in Settings → Text-to-speech.</p>
+    <button type="button" class="sound-toggle" id="testBtn" style="margin-top:12px;" onclick="runTest()">Test voice &amp; vibration</button>
+    <p id="diag" style="color:var(--muted);font-size:12px;margin:8px auto 0;max-width:320px;line-height:1.45;"></p>
+
+    <div class="b-controls">
+      <button class="btn" id="bStart" onclick="toggleBreath()">Begin</button>
+    </div>
+  </div>
+</div>
+
+<!-- HEALTH -->
+<div class="wrap" id="viewHealth" style="display:none;">
+  <div class="seg" id="healthSeg">
+    <button class="on" onclick="setHealthKind('bp',this)">Blood pressure</button>
+    <button onclick="setHealthKind('glucose',this)">Glucose</button>
+  </div>
+
+  <!-- BP form -->
+  <div class="card hcard" id="bpForm">
+    <div class="field">
+      <label class="label">Date &amp; time</label>
+      <input type="datetime-local" id="bp_time" class="date-input">
+    </div>
+    <div class="trio">
+      <div><label class="label sm">Systolic</label><input type="number" id="bp_sys" inputmode="numeric" placeholder="120"><span class="unit">mmHg</span></div>
+      <div><label class="label sm">Diastolic</label><input type="number" id="bp_dia" inputmode="numeric" placeholder="80"><span class="unit">mmHg</span></div>
+      <div><label class="label sm">Pulse</label><input type="number" id="bp_pul" inputmode="numeric" placeholder="72"><span class="unit">bpm</span></div>
+    </div>
+    <input type="text" id="bp_note" placeholder="Note (optional) — e.g. after walk" style="margin-top:6px;">
+    <button class="btn" style="margin-top:14px;" onclick="saveBP()">Save reading</button>
+  </div>
+
+  <!-- Glucose form -->
+  <div class="card hcard" id="glForm" style="display:none;">
+    <div class="field">
+      <label class="label">Date &amp; time</label>
+      <input type="datetime-local" id="gl_time" class="date-input">
+    </div>
+    <div class="field">
+      <label class="label sm">Reading type</label>
+      <div class="seg sub" id="glTypeSeg">
+        <button class="on" onclick="setGlType('fasting',this)">Fasting</button>
+        <button onclick="setGlType('pp',this)">Post-meal (PP)</button>
+        <button onclick="setGlType('random',this)">Random</button>
+      </div>
+    </div>
+    <div class="duo">
+      <div><label class="label sm">Glucose</label><input type="number" id="gl_val" inputmode="numeric" placeholder="95"><span class="unit" id="glUnit">mg/dL</span></div>
+      <div id="ppGapWrap"><label class="label sm">Hrs after meal</label><input type="number" id="gl_gap" inputmode="decimal" placeholder="2" step="0.5"><span class="unit">hours</span></div>
+    </div>
+    <input type="text" id="gl_note" placeholder="Note (optional) — e.g. after lunch" style="margin-top:6px;">
+    <button class="btn" style="margin-top:14px;" onclick="saveGlucose()">Save reading</button>
+  </div>
+
+  <!-- Graph -->
+  <div class="card">
+    <div class="graph-head">
+      <span class="graph-title" id="graphTitle">Trend</span>
+      <div class="range-pick" id="rangePick">
+        <button class="on" onclick="setRange(7,this)">7d</button>
+        <button onclick="setRange(30,this)">30d</button>
+        <button onclick="setRange(90,this)">90d</button>
+        <button onclick="setRange(3650,this)">All</button>
+      </div>
+    </div>
+    <div id="chartWrap"><svg id="chart" viewBox="0 0 320 180" preserveAspectRatio="xMidYMid meet"></svg></div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <!-- Readings list -->
+  <div id="hList"></div>
+</div>
+
+<footer>
+  Entries are stored only on this device, in this browser.<br>
+  Adapted from Carol Vivyan / Padesky (CBT). A tool for reflection, not a substitute for professional support.
+</footer>
+
+<div class="toast" id="toast">Saved</div>
+
+<script>
+  const KEY='thoughtRecords_v1';
+  let editingId=null;
+
+  function todayStr(){const d=new Date();return d.toISOString().slice(0,10);}
+  document.getElementById('f_date').value=todayStr();
+
+  function upd(el,which){
+    const v=el.value;
+    el.style.setProperty('--p',v+'%');
+    document.getElementById(which==='b'?'beforeVal':'afterVal').textContent=v+'%';
+  }
+  upd(document.getElementById('f_before'),'b');
+  upd(document.getElementById('f_after'),'a');
+
+  function load(){try{return JSON.parse(localStorage.getItem(KEY))||[];}catch(e){return[];}}
+  function store(a){localStorage.setItem(KEY,JSON.stringify(a));updateCount();}
+  function updateCount(){const n=load().length;document.getElementById('count').textContent=n?('· '+n):'';}
+
+  function val(id){return document.getElementById(id).value.trim();}
+
+  function saveEntry(){
+    const entry={
+      id: editingId||Date.now(),
+      date: document.getElementById('f_date').value||todayStr(),
+      situation: val('f_situation'),
+      feelings: val('f_feelings'),
+      before: document.getElementById('f_before').value,
+      thought: val('f_thought'),
+      forE: val('f_for'),
+      against: val('f_against'),
+      balanced: val('f_balanced'),
+      after: document.getElementById('f_after').value,
+      outcome: val('f_outcome')
+    };
+    if(!entry.situation && !entry.thought && !entry.feelings){toast('Add a little first');return;}
+    let arr=load();
+    if(editingId){arr=arr.map(e=>e.id===editingId?entry:e);}
+    else{arr.unshift(entry);}
+    store(arr);
+    clearForm(false);
+    toast(editingId?'Updated':'Saved');
+    editingId=null;
+    document.getElementById('saveBtn').textContent='Save entry';
+    showTab('saved');
+  }
+
+  function clearForm(notify){
+    editingId=null;
+    document.getElementById('saveBtn').textContent='Save entry';
+    ['f_situation','f_feelings','f_thought','f_for','f_against','f_balanced','f_outcome'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('f_date').value=todayStr();
+    document.getElementById('f_before').value=50;document.getElementById('f_after').value=50;
+    upd(document.getElementById('f_before'),'b');upd(document.getElementById('f_after'),'a');
+    if(notify)toast('Cleared');
+  }
+
+  function fmtDate(s){const d=new Date(s+'T00:00');if(isNaN(d))return s;return d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});}
+  function esc(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+
+  function render(){
+    const arr=load();const list=document.getElementById('list');
+    if(!arr.length){
+      list.innerHTML='<div class="empty"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 19V5a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg><br>No entries yet.<br>Your saved thoughts will appear here.</div>';
+      return;
+    }
+    list.innerHTML=arr.map(e=>{
+      const drop=(e.before-e.after);
+      return `<div class="entry">
+        <div class="top"><span class="date">${fmtDate(e.date)}</span></div>
+        <div class="trig">${esc(e.situation)||'<i style="color:#a89c8a">No situation noted</i>'}</div>
+        <div class="moods">
+          <span class="pill before">before ${e.before}%</span>
+          <span class="pill after">after ${e.after}%</span>
+          ${drop>0?`<span class="pill" style="background:#eef3ec">↓ ${drop} pts</span>`:''}
+        </div>
+        <div class="entry-actions">
+          <button class="mini" onclick="toggle(${e.id})">View</button>
+          <button class="mini" onclick="edit(${e.id})">Edit</button>
+          <button class="mini del" onclick="del(${e.id})">Delete</button>
+        </div>
+        <div class="detail" id="d${e.id}">
+          ${row('Feelings',e.feelings)}
+          ${row('Unhelpful thought',e.thought)}
+          ${row('Facts for',e.forE)}
+          ${row('Facts against',e.against)}
+          ${row('Balanced perspective',e.balanced)}
+          ${row('Outcome',e.outcome)}
+        </div>
+      </div>`;
+    }).join('');
+  }
+  function row(label,v){if(!v)return'';return `<p><span class="dl">${label}</span>${esc(v)}</p>`;}
+
+  function toggle(id){document.getElementById('d'+id).classList.toggle('show');}
+
+  function exportEntries(){
+    const entries=load(), health=hLoad();
+    if(!entries.length && !health.length){toast('Nothing to back up yet');return;}
+    const payload={app:'thought-record', version:2, entries, health};
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    const stamp=new Date().toISOString().slice(0,10);
+    a.href=url;a.download='thought-record-backup-'+stamp+'.json';
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    toast('Backup saved to Downloads');
+  }
+
+  function importEntries(ev){
+    const file=ev.target.files[0];if(!file)return;
+    const reader=new FileReader();
+    reader.onload=()=>{
+      try{
+        const data=JSON.parse(reader.result);
+        let incEntries=[], incHealth=[];
+        if(Array.isArray(data)){ incEntries=data; }                 // old format
+        else { incEntries=data.entries||[]; incHealth=data.health||[]; }
+        // merge thought records
+        const cur=load(), ids=new Set(cur.map(e=>e.id));
+        const mEntries=cur.concat(incEntries.filter(e=>e&&!ids.has(e.id))).sort((a,b)=>b.id-a.id);
+        store(mEntries);
+        // merge health
+        const curH=hLoad(), hids=new Set(curH.map(r=>r.id));
+        const mHealth=curH.concat(incHealth.filter(r=>r&&!hids.has(r.id)));
+        hStore(mHealth);
+        render();
+        toast('Restored '+incEntries.length+' entries, '+incHealth.length+' readings');
+      }catch(e){toast('Couldn\u2019t read that file');}
+      ev.target.value='';
+    };
+    reader.readAsText(file);
+  }
+
+  function edit(id){
+    const e=load().find(x=>x.id===id);if(!e)return;
+    editingId=id;
+    document.getElementById('f_date').value=e.date;
+    document.getElementById('f_situation').value=e.situation;
+    document.getElementById('f_feelings').value=e.feelings;
+    document.getElementById('f_thought').value=e.thought;
+    document.getElementById('f_for').value=e.forE;
+    document.getElementById('f_against').value=e.against;
+    document.getElementById('f_balanced').value=e.balanced;
+    document.getElementById('f_outcome').value=e.outcome;
+    document.getElementById('f_before').value=e.before;
+    document.getElementById('f_after').value=e.after;
+    upd(document.getElementById('f_before'),'b');upd(document.getElementById('f_after'),'a');
+    document.getElementById('saveBtn').textContent='Update entry';
+    showTab('new');window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  function del(id){
+    if(!confirm('Delete this entry?'))return;
+    store(load().filter(e=>e.id!==id));
+    render();toast('Deleted');
+  }
+
+  function showTab(t){
+    document.getElementById('viewNew').style.display   = t==='new'?'block':'none';
+    document.getElementById('viewSaved').style.display = t==='saved'?'block':'none';
+    document.getElementById('viewBreathe').style.display = t==='breathe'?'block':'none';
+    document.getElementById('viewHealth').style.display = t==='health'?'block':'none';
+    document.getElementById('tabNew').classList.toggle('active', t==='new');
+    document.getElementById('tabSaved').classList.toggle('active', t==='saved');
+    document.getElementById('tabBreathe').classList.toggle('active', t==='breathe');
+    document.getElementById('tabHealth').classList.toggle('active', t==='health');
+    if(t!=='breathe') stopBreath();
+    if(t==='saved') render();
+    if(t==='health') initHealth();
+  }
+
+  let toastT;
+  function toast(msg){
+    const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+    clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),1800);
+  }
+
+  /* ---- Breathing techniques ---- */
+  // each phase: name, orb class (inhale/hold/exhale), seconds, spoken cue, tone Hz, vibration unit [on,off]
+  const TECHNIQUES={
+    '478':{
+      label:'4-7-8', short:'4-7-8',
+      intro:'The 4-7-8 breath: inhale for 4, hold for 7, exhale for 8. A few rounds can settle the nervous system.',
+      defaultRounds:4,
+      phases:[
+        {name:'Breathe in', cls:'inhale', secs:4, say:'Breathe in', tone:392, unit:[300,300]},
+        {name:'Hold',       cls:'hold',   secs:7, say:'Hold',       tone:523, unit:[70,180]},
+        {name:'Breathe out',cls:'exhale', secs:8, say:'Breathe out',tone:294, unit:[600,200]}
+      ]
+    },
+    'box':{
+      label:'Box', short:'4-4-4-4',
+      intro:'Box breathing: in for 4, hold for 4, out for 4, hold empty for 4. Good for regaining focus and a calm, steady mind.',
+      defaultRounds:5,
+      phases:[
+        {name:'Breathe in', cls:'inhale', secs:4, say:'Breathe in', tone:392, unit:[300,300]},
+        {name:'Hold',       cls:'hold',   secs:4, say:'Hold',       tone:523, unit:[70,180]},
+        {name:'Breathe out',cls:'exhale', secs:4, say:'Breathe out',tone:294, unit:[600,200]},
+        {name:'Hold empty', cls:'exhale', secs:4, say:'Hold',       tone:330, unit:[70,180]}
+      ]
+    },
+    'belly':{
+      label:'Belly', short:'4-6',
+      intro:'Diaphragmatic (belly) breathing: a hand on your belly, breathe in slowly through the nose so the belly rises, then out gently through pursed lips. Calms the fight-or-flight response.',
+      defaultRounds:8,
+      phases:[
+        {name:'Breathe in', cls:'inhale', secs:4, say:'Breathe in, belly out', tone:392, unit:[300,300]},
+        {name:'Breathe out',cls:'exhale', secs:6, say:'Breathe out slowly',    tone:294, unit:[600,200]}
+      ]
+    }
+  };
+  let techKey='478';
+  let PHASES = TECHNIQUES[techKey].phases;
+
+  function setTech(key, btn){
+    if(bRunning) return;
+    techKey=key;
+    PHASES=TECHNIQUES[key].phases;
+    document.querySelectorAll('#techPick button').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+    document.getElementById('breatheIntro').textContent=TECHNIQUES[key].intro;
+    document.getElementById('countNum').textContent=TECHNIQUES[key].short;
+    // reset rounds to a sensible default for the technique
+    const inp=document.getElementById('roundsInput');
+    inp.value=TECHNIQUES[key].defaultRounds;
+    syncRounds();
+  }
+
+  // tile a [on,off] unit to fill `secs` seconds -> a vibration pattern array
+  function fillPattern(unit, secs){
+    const total=secs*1000;
+    const pat=[]; let t=0;
+    while(t < total){
+      const on = Math.min(unit[0], total - t); pat.push(on); t += on;
+      if(t >= total) break;
+      const off = Math.min(unit[1], total - t); pat.push(off); t += off;
+    }
+    return pat;
+  }
+  let bRunning=false, bRounds=4, bRound=0, bPhase=0, bRemain=0, bTimer=null;
+  let soundOn=true, audioCtx=null, vibOn=true;
+  const orb=()=>document.getElementById('orb');
+
+  function disablePicker(d){
+    document.getElementById('roundsInput').disabled=d;
+    document.querySelectorAll('.stepper button').forEach(b=>b.disabled=d);
+    document.querySelectorAll('#techPick button').forEach(b=>b.disabled=d);
+  }
+
+  function bumpRounds(delta){
+    if(bRunning) return;
+    const inp=document.getElementById('roundsInput');
+    let v=parseInt(inp.value||'4',10)+delta;
+    if(isNaN(v)) v=4;
+    v=Math.max(1,Math.min(99,v));
+    inp.value=v; syncRounds();
+  }
+  function syncRounds(){
+    if(bRunning) return;
+    const inp=document.getElementById('roundsInput');
+    let v=parseInt(inp.value,10);
+    if(isNaN(v)||v<1) v=1; if(v>99) v=99;
+    bRounds=v;
+    document.getElementById('roundTotal').textContent=v;
+  }
+
+  function toggleSound(){
+    soundOn=!soundOn;
+    const t=document.getElementById('soundToggle');
+    t.classList.toggle('on',soundOn);
+    t.textContent=(soundOn?'🔊':'🔇')+' Sound';
+    if(soundOn){ ensureAudio(); warmUpTTS(); }
+  }
+
+  function ensureAudio(){
+    if(!audioCtx){
+      try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}
+    }
+    if(audioCtx && audioCtx.state==='suspended') audioCtx.resume();
+  }
+
+  // soft sine tone with gentle fade — pleasant, not jarring
+  function playTone(freq){
+    if(!soundOn||!audioCtx) return;
+    const now=audioCtx.currentTime;
+    const osc=audioCtx.createOscillator();
+    const gain=audioCtx.createGain();
+    osc.type='sine'; osc.frequency.value=freq;
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    gain.gain.setValueAtTime(0,now);
+    gain.gain.linearRampToValueAtTime(0.18, now+0.06);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now+0.55);
+    osc.start(now); osc.stop(now+0.6);
+  }
+
+  // spoken cue using the device's voice
+  let ttsVoice=null, ttsReady=false, ttsSupported=('speechSynthesis' in window);
+
+  function loadVoices(){
+    if(!ttsSupported) return;
+    const voices=window.speechSynthesis.getVoices()||[];
+    if(!voices.length) return;
+    // prefer an English voice; fall back to the first available
+    ttsVoice = voices.find(v=>/^en[-_]/i.test(v.lang)) || voices.find(v=>/en/i.test(v.lang)) || voices[0];
+    ttsReady=true;
+  }
+  if(ttsSupported){
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged=loadVoices; // Android often loads them late
+  }
+
+  // a quiet warm-up so the very first real cue isn't swallowed
+  function warmUpTTS(){
+    if(!ttsSupported) return;
+    try{
+      window.speechSynthesis.resume();
+      if(!ttsReady) loadVoices();
+      const u=new SpeechSynthesisUtterance(' ');
+      u.volume=0; window.speechSynthesis.speak(u);
+    }catch(e){}
+  }
+
+  function speak(text){
+    if(!soundOn || !ttsSupported) return;
+    try{
+      window.speechSynthesis.resume();
+      window.speechSynthesis.cancel();
+      const u=new SpeechSynthesisUtterance(text);
+      if(!ttsReady) loadVoices();
+      if(ttsVoice){ u.voice=ttsVoice; u.lang=ttsVoice.lang; } else { u.lang='en-US'; }
+      u.rate=0.9; u.pitch=1; u.volume=1;
+      window.speechSynthesis.speak(u);
+    }catch(e){}
+  }
+
+  function toggleVib(){
+    vibOn=!vibOn;
+    const t=document.getElementById('vibToggle');
+    t.classList.toggle('on',vibOn);
+    t.textContent=(vibOn?'📳':'📴')+' Vibrate';
+    if(!vibOn && navigator.vibrate){ try{navigator.vibrate(0);}catch(e){} }
+  }
+
+  function buzz(pattern){
+    if(vibOn && navigator.vibrate){ try{ navigator.vibrate(pattern); }catch(e){} }
+  }
+  function cue(p){ playTone(p.tone); speak(p.say); buzz(fillPattern(p.unit, p.secs)); }
+
+  // diagnostic: report and exercise voice + vibration on demand
+  function runTest(){
+    ensureAudio(); warmUpTTS();
+    const d=document.getElementById('diag');
+    const vibAvail = ('vibrate' in navigator);
+    let vibResult='not supported on this device/app';
+    if(vibAvail){
+      let ok=false; try{ ok=navigator.vibrate([200,100,200]); }catch(e){ ok=false; }
+      vibResult = ok ? 'triggered (you should feel it now)' : 'present but blocked by the device/app';
+    }
+    const voices = (('speechSynthesis' in window) ? (window.speechSynthesis.getVoices()||[]) : []);
+    let voiceResult;
+    if(!('speechSynthesis' in window)) voiceResult='speech not supported';
+    else if(!voices.length) voiceResult='no voice installed — add one in Settings → Text-to-speech';
+    else { voiceResult='speaking now ('+voices.length+' voice'+(voices.length>1?'s':'')+')'; speak('Voice is working'); }
+    d.innerHTML = '🔊 Tones: working<br>🗣 Voice: '+voiceResult+'<br>📳 Vibration: '+vibResult;
+  }
+
+  function setOrb(cls,secs){
+    const o=orb();
+    o.style.setProperty('--bt', secs+'s');
+    o.classList.remove('inhale','hold','exhale');
+    void o.offsetWidth;
+    o.classList.add(cls);
+  }
+
+  function startPhase(){
+    const p=PHASES[bPhase];
+    bRemain=p.secs;
+    document.getElementById('phaseText').firstChild.textContent=p.name;
+    document.getElementById('countNum').textContent=bRemain;
+    setOrb(p.cls,p.secs);
+    cue(p);
+  }
+
+  function tick(){
+    bRemain--;
+    if(bRemain>0){
+      document.getElementById('countNum').textContent=bRemain;
+      return;
+    }
+    bPhase++;
+    if(bPhase>=PHASES.length){
+      bPhase=0; bRound++;
+      document.getElementById('roundNum').textContent=bRound;
+      if(bRound>=bRounds){ finishBreath(); return; }
+    }
+    startPhase();
+  }
+
+  function toggleBreath(){ bRunning ? stopBreath() : startBreath(); }
+
+  function startBreath(){
+    syncRounds();
+    ensureAudio();
+    warmUpTTS();
+    // surface a hint if the device genuinely has no TTS voice
+    const note=document.getElementById('ttsNote');
+    if(note){
+      const hasVoice = ttsSupported && (window.speechSynthesis.getVoices()||[]).length>0;
+      note.style.display = hasVoice ? 'none' : 'block';
+    }
+    bRunning=true; bPhase=0; bRound=1;
+    document.getElementById('roundNum').textContent=bRound;
+    document.getElementById('bStart').textContent='Stop';
+    disablePicker(true);
+    startPhase();
+    bTimer=setInterval(tick,1000);
+  }
+
+  function stopBreath(){
+    if(bTimer) clearInterval(bTimer);
+    bTimer=null; bRunning=false;
+    try{window.speechSynthesis.cancel();}catch(e){}
+    if(navigator.vibrate) try{navigator.vibrate(0);}catch(e){}
+    document.getElementById('bStart').textContent='Begin';
+    disablePicker(false);
+    document.getElementById('phaseText').firstChild.textContent='Ready';
+    document.getElementById('countNum').textContent='4-7-8';
+    document.getElementById('roundNum').textContent='0';
+    setOrb('exhale',1);
+  }
+
+  function finishBreath(){
+    if(bTimer) clearInterval(bTimer);
+    bTimer=null; bRunning=false;
+    document.getElementById('bStart').textContent='Begin';
+    disablePicker(false);
+    document.getElementById('phaseText').firstChild.textContent='Done';
+    document.getElementById('countNum').textContent='\u2713';
+    setOrb('exhale',2);
+    if(soundOn) playTone(659);
+    speak('Well done');
+    toast('Nicely done');
+    buzz([120,80,120,80,300]);
+  }
+
+  /* ===== Health tracking (BP + glucose) ===== */
+  const HKEY='healthReadings_v1';
+  let healthKind='bp', glType='fasting', graphRange=7, healthInit=false;
+
+  function hLoad(){try{return JSON.parse(localStorage.getItem(HKEY))||[];}catch(e){return[];}}
+  function hStore(a){localStorage.setItem(HKEY,JSON.stringify(a));}
+
+  function nowLocal(){
+    const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset());
+    return d.toISOString().slice(0,16);
+  }
+
+  function initHealth(){
+    if(!healthInit){
+      document.getElementById('bp_time').value=nowLocal();
+      document.getElementById('gl_time').value=nowLocal();
+      healthInit=true;
+    }
+    drawChart(); renderHList();
+  }
+
+  function setHealthKind(k,btn){
+    healthKind=k;
+    document.querySelectorAll('#healthSeg button').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+    document.getElementById('bpForm').style.display = k==='bp'?'block':'none';
+    document.getElementById('glForm').style.display = k==='glucose'?'block':'none';
+    drawChart(); renderHList();
+  }
+
+  function setGlType(t,btn){
+    glType=t;
+    document.querySelectorAll('#glTypeSeg button').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+    document.getElementById('ppGapWrap').style.display = t==='pp'?'flex':'none';
+  }
+
+  function setRange(d,btn){
+    graphRange=d;
+    document.querySelectorAll('#rangePick button').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+    drawChart();
+  }
+
+  function saveBP(){
+    const sys=parseInt(document.getElementById('bp_sys').value,10);
+    const dia=parseInt(document.getElementById('bp_dia').value,10);
+    const pul=parseInt(document.getElementById('bp_pul').value,10);
+    const time=document.getElementById('bp_time').value||nowLocal();
+    if(isNaN(sys)||isNaN(dia)){toast('Enter systolic and diastolic');return;}
+    const arr=hLoad();
+    arr.push({id:Date.now(),kind:'bp',time,sys,dia,pul:isNaN(pul)?null:pul,note:document.getElementById('bp_note').value.trim()});
+    hStore(arr);
+    document.getElementById('bp_sys').value='';document.getElementById('bp_dia').value='';
+    document.getElementById('bp_pul').value='';document.getElementById('bp_note').value='';
+    document.getElementById('bp_time').value=nowLocal();
+    toast('Reading saved'); drawChart(); renderHList();
+  }
+
+  function saveGlucose(){
+    const v=parseFloat(document.getElementById('gl_val').value);
+    const time=document.getElementById('gl_time').value||nowLocal();
+    if(isNaN(v)){toast('Enter a glucose value');return;}
+    const gap=parseFloat(document.getElementById('gl_gap').value);
+    const arr=hLoad();
+    arr.push({id:Date.now(),kind:'glucose',time,val:v,type:glType,gap:(glType==='pp'&&!isNaN(gap))?gap:null,note:document.getElementById('gl_note').value.trim()});
+    hStore(arr);
+    document.getElementById('gl_val').value='';document.getElementById('gl_gap').value='';
+    document.getElementById('gl_note').value='';
+    document.getElementById('gl_time').value=nowLocal();
+    toast('Reading saved'); drawChart(); renderHList();
+  }
+
+  function hDelete(id){
+    if(!confirm('Delete this reading?'))return;
+    hStore(hLoad().filter(r=>r.id!==id));
+    drawChart(); renderHList();
+  }
+
+  function within(r){
+    const t=new Date(r.time).getTime();
+    return t >= Date.now()-graphRange*864e5;
+  }
+
+  // ---- SVG line chart ----
+  function drawChart(){
+    const svg=document.getElementById('chart');
+    const W=320,H=180,padL=34,padR=10,padT=14,padB=24;
+    const all=hLoad().filter(r=>r.kind===healthKind && within(r)).sort((a,b)=>new Date(a.time)-new Date(b.time));
+    const title=document.getElementById('graphTitle');
+    const legend=document.getElementById('legend');
+    if(!all.length){
+      svg.innerHTML='<text x="160" y="95" text-anchor="middle" fill="#a89c8a" font-size="12" font-style="italic" font-family="Newsreader,serif">No readings in this range yet</text>';
+      title.textContent = healthKind==='bp'?'Blood pressure':'Glucose';
+      legend.innerHTML=''; return;
+    }
+    // series
+    let series=[];
+    if(healthKind==='bp'){
+      title.textContent='Blood pressure (mmHg)';
+      series=[
+        {key:'sys',color:'#1b2a4a',label:'Systolic'},
+        {key:'dia',color:'#b5894a',label:'Diastolic'},
+        {key:'pul',color:'#7a9a6a',label:'Pulse'}
+      ];
+    }else{
+      title.textContent='Glucose (mg/dL)';
+      series=[{key:'val',color:'#1b2a4a',label:'Glucose'}];
+    }
+    // y-range
+    let vals=[];
+    all.forEach(r=>series.forEach(s=>{const x=r[s.key]; if(x!=null&&!isNaN(x))vals.push(x);}));
+    let mn=Math.min(...vals), mx=Math.max(...vals);
+    if(mn===mx){mn-=10;mx+=10;}
+    const padY=(mx-mn)*0.15||5; mn=Math.floor((mn-padY)/10)*10; mx=Math.ceil((mx+padY)/10)*10;
+    const t0=new Date(all[0].time).getTime(), t1=new Date(all[all.length-1].time).getTime();
+    const span=(t1-t0)||1;
+    const X=t=>padL+((new Date(t).getTime()-t0)/span)*(W-padL-padR);
+    const Y=v=>padT+(1-(v-mn)/(mx-mn))*(H-padT-padB);
+
+    let svgParts='';
+    // gridlines + y labels (4 steps)
+    for(let i=0;i<=4;i++){
+      const v=mn+(mx-mn)*i/4; const y=Y(v);
+      svgParts+=`<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W-padR}" y2="${y.toFixed(1)}" stroke="#e7dECB" stroke-width="0.7"/>`;
+      svgParts+=`<text x="${padL-5}" y="${(y+3).toFixed(1)}" text-anchor="end" fill="#a89c8a" font-size="9" font-family="Newsreader,serif">${Math.round(v)}</text>`;
+    }
+    // x labels: first + last date
+    const fmt=t=>{const d=new Date(t);return (d.getMonth()+1)+'/'+d.getDate();};
+    svgParts+=`<text x="${padL}" y="${H-8}" text-anchor="start" fill="#a89c8a" font-size="9" font-family="Newsreader,serif">${fmt(t0)}</text>`;
+    if(span>1) svgParts+=`<text x="${W-padR}" y="${H-8}" text-anchor="end" fill="#a89c8a" font-size="9" font-family="Newsreader,serif">${fmt(t1)}</text>`;
+    // series lines + dots
+    series.forEach(s=>{
+      const pts=all.filter(r=>r[s.key]!=null&&!isNaN(r[s.key])).map(r=>[X(r.time),Y(r[s.key])]);
+      if(pts.length>1){
+        svgParts+=`<polyline fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="${pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')}"/>`;
+      }
+      pts.forEach(p=>{svgParts+=`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${pts.length>30?'1.6':'2.8'}" fill="${s.color}"/>`;});
+    });
+    svg.innerHTML=svgParts;
+    legend.innerHTML=series.map(s=>`<span><i style="background:${s.color}"></i>${s.label}</span>`).join('');
+  }
+
+  function fmtWhen(iso){
+    const d=new Date(iso); if(isNaN(d))return iso;
+    return d.toLocaleDateString(undefined,{month:'short',day:'numeric'})+', '+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
+  }
+
+  function renderHList(){
+    const list=document.getElementById('hList');
+    const arr=hLoad().filter(r=>r.kind===healthKind).sort((a,b)=>new Date(b.time)-new Date(a.time));
+    if(!arr.length){list.innerHTML='';return;}
+    list.innerHTML=arr.map(r=>{
+      let val,sub='';
+      if(r.kind==='bp'){
+        val=r.sys+'/'+r.dia+' <span style="font-size:12px;color:#7a7064">mmHg</span>';
+        sub=r.pul?('Pulse '+r.pul+' bpm'):'';
+      }else{
+        const tag=r.type==='pp'?'<span class="tag pp">PP'+(r.gap?(' '+r.gap+'h'):'')+'</span>':(r.type==='fasting'?'<span class="tag fasting">Fasting</span>':'<span class="tag random">Random</span>');
+        val=r.val+' <span style="font-size:12px;color:#7a7064">mg/dL</span>'+tag;
+      }
+      return `<div class="hrow"><div>
+        <div class="hwhen">${fmtWhen(r.time)}</div>
+        <div class="hval">${val}</div>
+        ${sub?`<div class="hsub">${sub}</div>`:''}
+        ${r.note?`<div class="hnote">${esc(r.note)}</div>`:''}
+      </div><button class="hdel" onclick="hDelete(${r.id})">Delete</button></div>`;
+    }).join('');
+  }
+
+  updateCount();
+
+  // Register service worker for offline support / installability
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(()=>{});
+    });
+  }
+</script>
+</body>
+</html>
